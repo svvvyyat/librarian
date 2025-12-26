@@ -17,7 +17,7 @@ def get_text(file_path):
         else:
             return None
     except Exception as e:
-        print(f"Помилка читання {os.path.basename(file_path)}: {e}")
+        print(f"Помилка читання {file_path}: {e}")
         return None
 def read_txt(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
