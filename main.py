@@ -40,3 +40,42 @@ def get_time_modified(path):
     else:
         return None
 
+def remove_file_from_db(current_paths):
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT path FROM documents")
+    db_paths = set()
+    for row in c.fetchall():
+        path = row[0]
+        db_paths.add(path)
+    current_paths_set = set(current_paths)
+    delete = current_paths_set - db_paths
+    for path in delete:
+        c.execute("DELETE FROM documents WHERE path = ?",(path,))
+    conn.commit()
+    conn.close()
+    
+def run_indexing():
+    if not os.path.exists(DOCS_FOLDER):
+        os.makedirs(DOCS_FOLDER)
+    init_db()
+
+    all_file_paths = []
+    for root, dirs, files in os.walk(DOCS_FOLDER):
+        for file in files:
+            file_path = os.path.join(root, file)
+            all_file_paths.append(file_path)
+
+    remove_file_from_db(all_file_paths)
+
+    for file_path in all_file_paths:
+        file_name = os.path.basename(file_path)
+        last_modified = get_time_modified(file_path)
+        current_modified_time = os.path.getmtime(file_path)
+        if current_modified_time == last_modified:
+            continue
+        text = get_text(file_path)
+        if not text:
+            continue
+        analysis = analyze_text(text)
+        add_file_to_db(file_name,file_path,current_modified_time,analysis)
