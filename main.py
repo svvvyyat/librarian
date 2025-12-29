@@ -55,7 +55,7 @@ def remove_file_from_db(current_paths):
     conn.commit()
     conn.close()
     
-def run_indexing():
+def indexing():
     if not os.path.exists(DOCS_FOLDER):
         os.makedirs(DOCS_FOLDER)
     init_db()
